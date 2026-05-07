@@ -62,6 +62,48 @@ def get_city_coordinates(city_name):
         return None
 
 
+def get_forecast(latitude, longitude):
+    """Fetch 5-day daily forecast from Open-Meteo API."""
+    try:
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "daily": "temperature_2m_max,temperature_2m_min,weather_code",
+            "temperature_unit": "fahrenheit",
+            "forecast_days": 6,
+            "timezone": "auto",
+        }
+        response = requests.get(url, params=params, timeout=5, verify=False)
+        response.raise_for_status()
+
+        data = response.json()
+        daily = data.get("daily", {})
+        dates = daily.get("time", [])[1:6]
+        max_temps = daily.get("temperature_2m_max", [])[1:6]
+        min_temps = daily.get("temperature_2m_min", [])[1:6]
+        codes = daily.get("weather_code", [])[1:6]
+
+        forecast = []
+        for i, date in enumerate(dates):
+            from datetime import datetime
+            day_name = datetime.strptime(date, "%Y-%m-%d").strftime("%a")
+            code = codes[i] if i < len(codes) else 0
+            condition, icon = WEATHER_CODES.get(code, ("Unknown", "❓"))
+            forecast.append({
+                "day": day_name,
+                "icon": icon,
+                "condition": condition,
+                "high": max_temps[i] if i < len(max_temps) else None,
+                "low": min_temps[i] if i < len(min_temps) else None,
+            })
+        return forecast
+    except requests.exceptions.RequestException:
+        return []
+    except Exception:
+        return []
+
+
 def get_weather(latitude, longitude):
     """Fetch current weather data from Open-Meteo API."""
     try:
@@ -102,6 +144,7 @@ def index():
     weather_data = None
     city_info = None
     error = None
+    forecast = []
     
     if request.method == "POST":
         city_name = request.form.get("city", "").strip()
@@ -117,6 +160,7 @@ def index():
             else:
                 # Get weather data
                 weather_data = get_weather(city_info["latitude"], city_info["longitude"])
+                forecast = get_forecast(city_info["latitude"], city_info["longitude"])
                 
                 if not weather_data:
                     error = "Unable to fetch weather data. Please try again later."
@@ -126,6 +170,7 @@ def index():
         weather_data=weather_data,
         city_info=city_info,
         error=error,
+        forecast=forecast,
     )
 
 

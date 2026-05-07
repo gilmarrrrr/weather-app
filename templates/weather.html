@@ -169,6 +169,55 @@
             font-weight: bold;
         }
 
+        .forecast {
+            margin-top: 20px;
+        }
+
+        .forecast-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .forecast-days {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .forecast-day {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 10px 5px;
+            text-align: center;
+        }
+
+        .forecast-day-name {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .forecast-icon {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .forecast-temps {
+            font-size: 12px;
+        }
+
+        .forecast-high {
+            font-weight: bold;
+        }
+
+        .forecast-low {
+            opacity: 0.75;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 25px;
@@ -202,6 +251,19 @@
 
             .weather-details {
                 grid-template-columns: 1fr;
+            }
+
+            .forecast-days {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 5px;
+            }
+
+            .forecast-day {
+                padding: 8px 3px;
+            }
+
+            .forecast-icon {
+                font-size: 18px;
             }
         }
     </style>
@@ -261,6 +323,24 @@
                     </div>
                 </div>
             </div>
+
+            {% if forecast %}
+            <div class="forecast">
+                <div class="forecast-title">5-Day Forecast</div>
+                <div class="forecast-days">
+                    {% for day in forecast %}
+                    <div class="forecast-day">
+                        <div class="forecast-day-name">{{ day.day }}</div>
+                        <div class="forecast-icon">{{ day.icon }}</div>
+                        <div class="forecast-temps">
+                            <div class="forecast-high">{{ day.high }}°</div>
+                            <div class="forecast-low">{{ day.low }}°</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         {% endif %}
     </div>
 </body>
