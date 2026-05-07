@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 import ssl
 import urllib3
 
@@ -7,6 +7,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
+app.secret_key = "weather-app-secret-key-dev"  # Change in production
 
 # Weather code mapping (WMO codes to descriptions and emoji icons)
 WEATHER_CODES = {
@@ -147,6 +148,7 @@ def index():
     forecast = []
     unit = request.form.get("unit", "fahrenheit")
     unit_symbol = "F" if unit == "fahrenheit" else "C"
+    search_history = session.get("search_history", [])
 
     if request.method == "POST":
         city_name = request.form.get("city", "").strip()
@@ -166,6 +168,13 @@ def index():
                 
                 if not weather_data:
                     error = "Unable to fetch weather data. Please try again later."
+                else:
+                    # Add to search history (remove duplicates, keep last 5, ordered by recent)
+                    if city_info["name"] in search_history:
+                        search_history.remove(city_info["name"])
+                    search_history.insert(0, city_info["name"])
+                    search_history = search_history[:5]
+                    session["search_history"] = search_history
     
     return render_template(
         "weather.html",
@@ -175,6 +184,7 @@ def index():
         forecast=forecast,
         unit=unit,
         unit_symbol=unit_symbol,
+        search_history=search_history,
     )
 
 
