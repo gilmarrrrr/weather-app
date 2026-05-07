@@ -78,6 +78,35 @@
             transform: translateY(0);
         }
 
+        .unit-toggle {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .unit-toggle button {
+            background: none;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #555;
+            transition: all 0.2s;
+        }
+
+        .unit-toggle button:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .unit-toggle button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+            font-weight: bold;
+        }
+
         .error {
             background-color: #fee;
             color: #c33;
@@ -280,8 +309,18 @@
                 required
                 autofocus
             />
+            <input type="hidden" name="unit" id="unit-input" value="{{ unit }}">
             <button type="submit">Search</button>
         </form>
+
+        <div class="unit-toggle">
+            <button
+                onclick="document.getElementById('unit-input').value='fahrenheit'; document.querySelector('form').submit();"
+                class="{{ 'active' if unit == 'fahrenheit' else '' }}">°F</button>
+            <button
+                onclick="document.getElementById('unit-input').value='celsius'; document.querySelector('form').submit();"
+                class="{{ 'active' if unit == 'celsius' else '' }}">°C</button>
+        </div>
 
         {% if error %}
             <div class="error">{{ error }}</div>
@@ -296,8 +335,8 @@
 
                 <div class="weather-main">
                     <div class="temperature-section">
-                        <div class="temperature">{{ weather_data.temperature }}°F</div>
-                        <div class="feels-like">Feels like {{ weather_data.feels_like }}°F</div>
+                        <div class="temperature">{{ weather_data.temperature }}°{{ unit_symbol }}</div>
+                        <div class="feels-like">Feels like {{ weather_data.feels_like }}°{{ unit_symbol }}</div>
                     </div>
                     <div class="weather-icon">{{ weather_data.icon }}</div>
                 </div>
@@ -333,8 +372,8 @@
                         <div class="forecast-day-name">{{ day.day }}</div>
                         <div class="forecast-icon">{{ day.icon }}</div>
                         <div class="forecast-temps">
-                            <div class="forecast-high">{{ day.high }}°</div>
-                            <div class="forecast-low">{{ day.low }}°</div>
+                            <div class="forecast-high">{{ day.high }}°{{ unit_symbol }}</div>
+                            <div class="forecast-low">{{ day.low }}°{{ unit_symbol }}</div>
                         </div>
                     </div>
                     {% endfor %}

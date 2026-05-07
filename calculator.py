@@ -62,7 +62,7 @@ def get_city_coordinates(city_name):
         return None
 
 
-def get_forecast(latitude, longitude):
+def get_forecast(latitude, longitude, unit="fahrenheit"):
     """Fetch 5-day daily forecast from Open-Meteo API."""
     try:
         url = "https://api.open-meteo.com/v1/forecast"
@@ -70,7 +70,7 @@ def get_forecast(latitude, longitude):
             "latitude": latitude,
             "longitude": longitude,
             "daily": "temperature_2m_max,temperature_2m_min,weather_code",
-            "temperature_unit": "fahrenheit",
+            "temperature_unit": unit,
             "forecast_days": 6,
             "timezone": "auto",
         }
@@ -104,7 +104,7 @@ def get_forecast(latitude, longitude):
         return []
 
 
-def get_weather(latitude, longitude):
+def get_weather(latitude, longitude, unit="fahrenheit"):
     """Fetch current weather data from Open-Meteo API."""
     try:
         url = "https://api.open-meteo.com/v1/forecast"
@@ -112,7 +112,7 @@ def get_weather(latitude, longitude):
             "latitude": latitude,
             "longitude": longitude,
             "current": "temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,uv_index",
-            "temperature_unit": "fahrenheit",
+            "temperature_unit": unit,
         }
         response = requests.get(url, params=params, timeout=5, verify=False)
         response.raise_for_status()
@@ -145,7 +145,9 @@ def index():
     city_info = None
     error = None
     forecast = []
-    
+    unit = request.form.get("unit", "fahrenheit")
+    unit_symbol = "F" if unit == "fahrenheit" else "C"
+
     if request.method == "POST":
         city_name = request.form.get("city", "").strip()
         
@@ -159,8 +161,8 @@ def index():
                 error = f"City '{city_name}' not found. Please try again."
             else:
                 # Get weather data
-                weather_data = get_weather(city_info["latitude"], city_info["longitude"])
-                forecast = get_forecast(city_info["latitude"], city_info["longitude"])
+                weather_data = get_weather(city_info["latitude"], city_info["longitude"], unit)
+                forecast = get_forecast(city_info["latitude"], city_info["longitude"], unit)
                 
                 if not weather_data:
                     error = "Unable to fetch weather data. Please try again later."
@@ -171,6 +173,8 @@ def index():
         city_info=city_info,
         error=error,
         forecast=forecast,
+        unit=unit,
+        unit_symbol=unit_symbol,
     )
 
 
