@@ -80,7 +80,7 @@ No API key is required.
 - [x] Current weather with icons
 - [x] 5-day forecast
 - [x] °F / °C toggle
-- [ ] [Recent search history](https://github.com/gilmarrrrr/weather-app/issues/3)
+- [x] Recent search history
 
 ## License
 
